@@ -5,11 +5,12 @@ default_view:
     - group.famille
     - group.temps
 
-parents_bed_room:
+bed_rooms:
   view: yes
   icon: mdi:hotel
   entities:
     - group.sdb_parents
+    - group.sdb_enfants
 
 famille:
   - device_tracker.Noemi_phone
@@ -17,10 +18,18 @@ famille:
   - device_tracker.nut
 
 SdB_Parents:
+  name: SdB Parents
   icon: mdi:water-pump
   entities:
     - light.domitech_smart_led_retrofit_kit_ze27eu_level
     - scene.shower_on
+
+SdB_Enfants:
+  name: SdB Enfants
+  icon: mdi:water-pump
+  entities:
+    - light.sdb_enfants
+    - sensor.detecteur_de_mouvement_sans_fil_sdb_enfants
 
 SalonView:
   view: yes
@@ -46,6 +55,9 @@ Salon:
     - scene.diving_submarine
     - device_tracker.volets
     - cover.volets_salon
+    - sensor.tradfri_remote_control
+    - light.tradfri_bulb_e27_opal_1000lm_2
+
 KoKodi:
   control: hidden
   entities:
@@ -109,3 +121,4 @@ Experimental:
   entities:
     - timer.sdb_light
     - group.all_automations
+    - group.all_lights

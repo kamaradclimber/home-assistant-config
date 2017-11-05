@@ -121,7 +121,7 @@ zone:
     icon: "mdi:desktop-tower"
   - name: SPDO
     latitude: !secret spdo_latitude
-    longitude: !secret 0.4258917
+    longitude: !secret spdo_longitude
 
 
 zwave:
@@ -166,7 +166,7 @@ cover:
         command_close: curl -s http://192.168.0.20/down
         command_stop: curl -s http://192.168.0.20/down # can't do better for now
         # state fails when rovers are not connected and generates tons of errors in logs
-        # command_state: curl -s http://192.168.0.20/status
+        command_state: curl -s http://192.168.0.20/status
 
 input_boolean:
   light_control_by_kokodi:

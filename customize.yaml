@@ -28,3 +28,9 @@ device_tracker.nut2:
   icon: mdi:face
 group.all_automations:
   hidden: false
+group.all_lights:
+  hidden: false
+covers.volets_salon:
+  icon: mdi:garage
+device_tracker.spdo_chip:
+  icon: mdi:chip
