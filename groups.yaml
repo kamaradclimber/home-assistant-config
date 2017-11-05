@@ -1,0 +1,111 @@
+default_view:
+  view: yes
+  icon: mdi:home
+  entities:
+    - group.famille
+    - group.temps
+
+parents_bed_room:
+  view: yes
+  icon: mdi:hotel
+  entities:
+    - group.sdb_parents
+
+famille:
+  - device_tracker.Noemi_phone
+  - device_tracker.Gregoire_phone
+  - device_tracker.nut
+
+SdB_Parents:
+  icon: mdi:water-pump
+  entities:
+    - light.domitech_smart_led_retrofit_kit_ze27eu_level
+    - scene.shower_on
+
+SalonView:
+  view: yes
+  name: Salon
+  control: hidden
+  entities:
+    - group.Salon
+    - group.kokodi
+
+Salon:
+  control: hidden
+  name: Salon
+  entities:
+    - light.table_a_manger
+    - light.salon
+    - scene.reset_to_white
+    - device_tracker.milight
+    - sensor.milight_availability_24h
+    - sensor.milight_unavailability_24h
+    - scene.movie_paused
+    - scene.movie_playing
+    - scene.movie_stopped
+    - scene.diving_submarine
+    - device_tracker.volets
+    - cover.volets_salon
+KoKodi:
+  control: hidden
+  entities:
+    - input_boolean.light_control_by_kokodi
+    - device_tracker.kodi
+    - media_player.kokodi
+    - script.radio_swiss_classic
+
+rougepom:
+  control: hidden
+  entities:
+    - switch.nzbget_pause
+    - sensor.sonarr_upcoming
+    - sensor.sonarr_wanted
+
+rougepom_tech:
+  control: hidden
+  entities:
+    - sensor.speedtest_ping
+    - sensor.ping_stats_mean
+
+kodi_tech:
+  control: hidden
+  entities:
+    - device_tracker.kodi
+
+spdo_chip:
+  control: hidden
+  entities:
+    - device_tracker.spdo_chip
+
+server_view:
+  view: true
+  icon: mdi:desktop-classic
+  entities:
+    - group.rougepom
+    - group.spdo_chip
+    - group.kodi_tech
+
+
+Temps:
+  - sun.sun
+  - sensor.yr_symbol
+
+spdo_temperature:
+  entities:
+    - sensor.spdo_temperature
+    - switch.spdo_heating
+    - climate.spdo_thermostat
+SPDO_view:
+  view: yes
+  name: SPDO
+  control: hidden
+  entities:
+    - group.spdo_temperature
+
+Experimental:
+  view: true
+  icon: mdi:flask-outline
+  control: hidden
+  entities:
+    - timer.sdb_light
+    - group.all_automations

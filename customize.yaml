@@ -1,0 +1,30 @@
+script.radio_swiss_classic:
+  icon: mdi:radio
+device_tracker.kodi:
+  icon: mdi:projector
+script.bedtime:
+  icon: mdi:hotel
+script.restart_ha:
+  icon: mdi:restart
+scene.movie_paused:
+  icon: mdi:play-pause
+scene.movie_playing:
+  icon: mdi:play
+scene.movie_stopped:
+  icon: mdi:stop
+device_tracker.Imprimante:
+  icon: mdi:printer
+device_tracker.dellxps:
+  icon: mdi:laptop
+device_tracker.milight:
+  icon: mdi:wifi
+device_tracker.wifi:
+  icon: mdi:access-point
+device_tracker.soksabai_wifi:
+  icon: mdi:laptop
+device_tracker.nut1:
+  icon: mdi:face
+device_tracker.nut2:
+  icon: mdi:face
+group.all_automations:
+  hidden: false

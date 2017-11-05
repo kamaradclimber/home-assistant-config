@@ -1,0 +1,282 @@
+# to validate the conf:
+# sudo -u hass hass --script check_config --files -c /var/lib/hass
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: !secret location_name
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret location_latitude
+  longitude: !secret location_longitude
+  elevation: 66 # altitude
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/Paris
+  customize_domain:
+    device_tracker:
+      icon: mdi:network-question
+  customize: !include customize.yaml
+
+map:
+
+http:
+
+# Track the sun
+sun: # FIXME it generates to many logs
+
+recorder:
+  purge_keep_days: 14
+  purge_interval: 1
+
+logbook:
+  exclude:
+    domains:
+      - sun
+
+# Enables support for tracking state changes over time.
+history:
+
+# Discover some devices automatically
+discovery:
+
+# Enables the frontend
+frontend:
+
+# Allows you to issue voice commands from the frontend
+conversation:
+
+config:
+
+# Expose home-assistant metadata over bonjour
+zeroconf:
+
+media_player:
+  platform: kodi
+  host: 192.168.0.13
+  port: 8080
+  name: KoKodi
+
+# Prediction of weather
+sensor:
+  - platform: yr
+  - platform: speedtest
+    minute: 5
+    hour:
+      - 0
+      - 6
+      - 12
+      - 18
+    monitored_conditions:
+      - ping
+  - platform: cert_expiry
+    host: familleseux.net
+  - platform: statistics
+    name: Ping Stats
+    entity_id: sensor.speedtest_ping
+  - platform: sonarr
+    api_key: !secret sonarr_api_key
+    host: familleseux.net
+    port: 443
+    ssl: true
+    urlbase: /sonarr
+    days: 6
+    monitored_conditions:
+      - upcoming
+      - wanted
+  - platform: radarr
+    api_key: !secret radarr_api_key
+    host: familleseux.net
+    port: 443
+    ssl: true
+    urlbase: /radarr
+    days: 6
+    monitored_conditions:
+      - upcoming
+      - wanted
+      - movies
+  - platform: rest
+    resource: !secret spdo_temperature_url
+    name: Spdo Temperature
+    value_template: '{{ value_json.temperature }}'
+    unit_of_measurement: "°C"
+
+tradfri:
+  host: 192.168.0.121
+
+device_tracker:
+  - platform: nmap_tracker
+    hosts: 192.168.0.0/24
+    home_interval: 10
+    interval_seconds: 120
+    track_new_devices: yes
+    # waiting for work on performance
+    #  - platform: bluetooth_le_tracker
+  - platform: ping
+    hosts:
+      spdo_chip: !secret spdo_hostname
+
+
+zone:
+  - name: Criteo # Work
+    longitude: 2.331610
+    latitude: 48.878887
+    icon: "mdi:desktop-tower"
+  - name: SPDO
+    latitude: !secret spdo_latitude
+    longitude: !secret 0.4258917
+
+
+zwave:
+  usb_path: /dev/ttyACM0
+  polling_interval: 60000
+  autoheal: False # is done at midnight
+  device_config_domain:
+    light:
+      polling_intensity: 1
+
+light:
+  platform: limitlessled
+  bridges:
+    - host: 192.168.0.110
+      version: 4
+      port: 8899
+      groups:
+        - number: 1
+          type: rgbw
+          name: Table à manger
+        - number: 2
+          type: rgbw
+          name: Salon
+
+switch:
+    # put a secret password to trigger theromostat!
+  - platform: rest
+    resource: !secret spdo_heating_url
+    name: Spdo Heating
+  - platform: command_line
+    switches:
+      nzbget_pause:
+        command_on: "curl -L -XPOST rougepom/nzbget/jsonrpc -d '{\"method\": \"pausepost\"}' && curl -XPOST rougepom/nzbget/jsonrpc -d '{\"method\": \"pausedownload\"}'"
+        command_off: "curl -L -XPOST rougepom/nzbget/jsonrpc -d '{\"method\": \"scheduleresume\", \"params\": [1]}'"
+        command_state: "curl -L -s rougepom/nzbget/jsonrpc -d '{\"method\": \"status\"}' |grep -q 'Paused\" : true'"
+
+cover:
+  - platform: command_line
+    covers:
+      volets_salon:
+        command_open: curl -s http://192.168.0.20/up
+        command_close: curl -s http://192.168.0.20/down
+        command_stop: curl -s http://192.168.0.20/down # can't do better for now
+        # state fails when rovers are not connected and generates tons of errors in logs
+        # command_state: curl -s http://192.168.0.20/status
+
+input_boolean:
+  light_control_by_kokodi:
+    name: Kokodi controle lumière du salon
+    initial: on
+    icon: mdi:toggle-switch
+
+shell_command:
+  classical_music_on_kodi: /var/lib/hass/play_random_classical_music_kodi.sh
+  radio_swiss_classic: /var/lib/hass/play_radio_swiss_classic.sh
+  play_music_from: '/usr/bin/systemd-cat /var/lib/hass/play_music_from "{{from}}"'
+
+script: !include scripts.yaml
+
+
+
+# Grouped states should share the same type of states (ON/OFF or HOME/NOT_HOME)
+group: !include groups.yaml
+
+scene:
+  - name: Reset to white
+    entities:
+      light.table_a_manger:
+        state: on
+        transition: 5
+        brightness: 75
+        color_name: white
+      light.salon:
+        state: on
+        transition: 5
+        brightness: 75
+        color_name: white
+  - name: Movie Playing
+    entities:
+      light.table_a_manger:
+        state: on
+        transition: 5
+        brightness: 75
+        color_name: blue
+      light.salon:
+        state: off
+        transition: 5
+      script.bedtime:
+        state: off
+      switch.nzbget_pause:
+        state: on
+  - name: Movie Paused
+    entities:
+      light.table_a_manger:
+        state: on
+        transition: 5
+        brightness: 75
+        color_name: white
+      light.salon:
+        state: on
+        transition: 5
+        brightness: 75
+        color_name: white
+      script.bedtime:
+        state: off
+  - name: Movie Stopped
+    entities:
+      script.bedtime:
+        state: on
+      switch.nzbget_pause:
+        state: off
+  - name: Shower on
+    entities:
+      script.shower_on:
+        state: on
+
+automation: !include automations.yaml
+
+logger:
+  logs:
+    homeassistant.components: warning
+    homeassistant.components.cover.volets_salon: critical
+    homeassistant.core: warning
+    libopenzwave: warning
+    openzwave: warning
+
+snips:
+
+
+intent_script:
+  Play:
+    action:
+      - service: media_player.media_play
+        entity_id: media_player.kokodi
+  PauseIntent:
+    action:
+      - service: media_player.media_pause
+        entity_id: media_player.kokodi
+  MusicFrom: # play music from xxx
+    action:
+      - service: shell_command.play_music_from
+        data_template:
+          from: "{{artist}}"
+
+
+shopping_list:
+
+climate:
+  - platform: generic_thermostat
+    name: Spdo Thermostat
+    heater: switch.spdo_heating
+    target_sensor: sensor.spdo_temperature
+    target_temp: 19.5
+    tolerance: 0.5
+
+timer:
+  sdb_light:
+    duration: 00:07:00
